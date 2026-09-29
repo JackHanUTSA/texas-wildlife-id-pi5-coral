@@ -1,0 +1,15 @@
+background
+white-tailed deer
+mule deer
+coyote
+gray fox
+bobcat
+mountain lion
+javelina
+armadillo
+raccoon
+opossum
+striped skunk
+feral hog
+wild turkey
+northern bobwhite
