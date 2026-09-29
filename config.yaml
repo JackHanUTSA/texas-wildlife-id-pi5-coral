@@ -1,0 +1,63 @@
+camera:
+  sensor_mode: 3
+  resolution_width: 1280
+  resolution_height: 720
+  framerate: 15
+  awb_mode: off
+  exposure_mode: night
+  analog_gain: 2.0
+  digital_gain: 1.5
+
+inference:
+  model_path: models/wildlife_edgetpu.tflite
+  labels_path: models/labels.txt
+  input_size: 320
+  confidence_threshold: 0.45
+  nms_threshold: 0.5
+  max_detections: 10
+
+output:
+  log_file: logs/detections.csv
+  save_images: true
+  save_dir: logs/images
+  display: false
+
+power:
+  solar_enabled: true
+  battery_monitor_pin: 0
+  low_battery_threshold: 20
+  shutdown_on_low: false
+
+cellular:
+  enabled: true
+  modem_device: /dev/ttyUSB0
+  apn: your_apn
+  receiver_url: https://your-receiver.com/api/upload
+  send_on_detection: true
+  max_retries: 3
+
+motor:
+  enabled: true
+  gpio_pin: 18
+  trigger_on_classes:
+    - white-tailed deer
+    - feral hog
+    - bobcat
+  trigger_duration_sec: 5
+  cooldown_sec: 30
+
+texas_species:
+  - white-tailed deer
+  - mule deer
+  - coyote
+  - gray fox
+  - bobcat
+  - mountain lion
+  - javelina
+  - armadillo
+  - raccoon
+  - opossum
+  - striped skunk
+  - feral hog
+  - wild turkey
+  - northern bobwhite
