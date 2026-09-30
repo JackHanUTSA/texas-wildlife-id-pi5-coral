@@ -27,7 +27,9 @@ Enclosure for Texas Wildlife ID system.
 5. Solar charge controller + battery in base compartment
 6. Motor driver board on GPIO header
 7. Camera module on ribbon cable through cutout
-8. Seal with silicone gasket for weatherproofing
+8. Install 40mm PWM fan in fan mount with chimney for exhaust
+9. Mount BME280 climate sensor inside with vents for airflow
+10. Seal with silicone gasket for weatherproofing
 
 ## Customization
 Edit parameters at top of case.scad for your specific modules.

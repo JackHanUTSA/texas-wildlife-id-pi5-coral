@@ -1,4 +1,4 @@
-// Texas Wildlife ID - 3D Printed Enclosure v2 with lid and cable glands
+// Texas Wildlife ID - 3D Printed Enclosure v3 with thermal management
 enclosure_width = 150;
 enclosure_depth = 120;
 enclosure_height = 60;
@@ -18,6 +18,12 @@ solar_panel_width = 200;
 solar_panel_depth = 150;
 bracket_length = 80;
 bracket_thickness = 5;
+
+// Thermal management params
+fan_dia = 40;
+fan_thickness = 10;
+chimney_height = 40;
+heatsink_fin_height = 15;
 
 module base(){
     difference(){
@@ -62,9 +68,35 @@ module pi_standoffs(){
 }
 
 module vents(){
-    for(i=[0:4]){
-        translate([-enclosure_width/2+20 + i*25, enclosure_depth/2 - wall_thickness/2, 0])
-        cube([20, wall_thickness, 10], center=true);
+    // Intake vents low on side
+    for(i=[0:3]){
+        translate([-enclosure_width/2+25 + i*35, enclosure_depth/2 - wall_thickness/2, -enclosure_height/2 + 15])
+        cube([25, wall_thickness, 8], center=true);
+    }
+}
+
+module fan_mount(){
+    // 40mm fan mount on top
+    translate([0, -enclosure_depth/2 + wall_thickness, enclosure_height/2 - wall_thickness])
+    rotate([90,0,0])
+    difference(){
+        cylinder(h=wall_thickness+5, d=fan_dia+4, center=true);
+        cylinder(h=wall_thickness+10, d=fan_dia, center=true);
+    }
+}
+
+module chimney(){
+    // Exhaust chimney above fan
+    translate([0, -enclosure_depth/2 - 10, enclosure_height/2])
+    rotate([90,0,0])
+    cylinder(h=chimney_height, d=fan_dia+6, center=false);
+}
+
+module heatsink_fins(){
+    // Passive fins on top of enclosure
+    for(i=[0:5]){
+        translate([ -enclosure_width/2 + 20 + i*25, 0, enclosure_height/2 + lid_thickness])
+        cube([15, enclosure_depth-20, heatsink_fin_height], center=true);
     }
 }
 
@@ -92,6 +124,9 @@ module cable_gland(){
 base();
 pi_standoffs();
 vents();
+fan_mount();
+chimney();
+heatsink_fins();
 lid();
 solar_bracket();
 // cable_gland(); // uncomment to preview
