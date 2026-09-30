@@ -46,6 +46,22 @@ motor:
   trigger_duration_sec: 5
   cooldown_sec: 30
 
+climate:
+  enabled: true
+  sensor_type: bme280
+  i2c_bus: 1
+  address: 0x76
+  log_interval_sec: 60
+
+fan:
+  enabled: true
+  gpio_pin: 12
+  pwm_freq_hz: 25000
+  temp_threshold_c: 55
+  humidity_threshold: 80
+  min_duty: 30
+  max_duty: 100
+
 texas_species:
   - white-tailed deer
   - mule deer
