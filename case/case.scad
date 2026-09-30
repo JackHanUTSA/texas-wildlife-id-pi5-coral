@@ -1,4 +1,4 @@
-// Texas Wildlife ID - 3D Printed Enclosure v3 with thermal management
+// Texas Wildlife ID - 3D Printed Enclosure v4 with pan-tilt support
 enclosure_width = 150;
 enclosure_depth = 120;
 enclosure_height = 60;
@@ -24,6 +24,10 @@ fan_dia = 40;
 fan_thickness = 10;
 chimney_height = 40;
 heatsink_fin_height = 15;
+
+// Pan-tilt mount params
+pan_tilt_base_dia = 80;
+pan_tilt_mount_height = 20;
 
 module base(){
     difference(){
@@ -68,7 +72,6 @@ module pi_standoffs(){
 }
 
 module vents(){
-    // Intake vents low on side
     for(i=[0:3]){
         translate([-enclosure_width/2+25 + i*35, enclosure_depth/2 - wall_thickness/2, -enclosure_height/2 + 15])
         cube([25, wall_thickness, 8], center=true);
@@ -76,7 +79,6 @@ module vents(){
 }
 
 module fan_mount(){
-    // 40mm fan mount on top
     translate([0, -enclosure_depth/2 + wall_thickness, enclosure_height/2 - wall_thickness])
     rotate([90,0,0])
     difference(){
@@ -86,17 +88,28 @@ module fan_mount(){
 }
 
 module chimney(){
-    // Exhaust chimney above fan
     translate([0, -enclosure_depth/2 - 10, enclosure_height/2])
     rotate([90,0,0])
     cylinder(h=chimney_height, d=fan_dia+6, center=false);
 }
 
 module heatsink_fins(){
-    // Passive fins on top of enclosure
     for(i=[0:5]){
         translate([ -enclosure_width/2 + 20 + i*25, 0, enclosure_height/2 + lid_thickness])
         cube([15, enclosure_depth-20, heatsink_fin_height], center=true);
+    }
+}
+
+module pan_tilt_mount(){
+    translate([0, enclosure_depth/2 + pan_tilt_mount_height/2, -enclosure_height/2])
+    difference(){
+        cylinder(h=pan_tilt_mount_height, d=pan_tilt_base_dia, center=true);
+        translate([0,0,0]) cylinder(h=pan_tilt_mount_height+2, d=20, center=true);
+        for(a=[0:3]){
+            rotate([0,0,a*90])
+            translate([pan_tilt_base_dia/2 - 10, 0, 0])
+            cylinder(h=pan_tilt_mount_height+2, d=mount_hole_dia, center=true);
+        }
     }
 }
 
@@ -127,6 +140,7 @@ vents();
 fan_mount();
 chimney();
 heatsink_fins();
+pan_tilt_mount();
 lid();
 solar_bracket();
 // cable_gland(); // uncomment to preview

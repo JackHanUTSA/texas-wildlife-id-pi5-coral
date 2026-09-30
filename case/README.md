@@ -20,13 +20,13 @@ Enclosure for Texas Wildlife ID system.
 - Lid optional
 
 ## Assembly
-1. Print base and lid
+1. Print base, lid, pan-tilt mount
 2. Mount Pi5 to M2.5 standoffs
 3. Coral TPU plugs into USB 3.0 port
 4. SIM modem mounts on side bracket
 5. Solar charge controller + battery in base compartment
 6. Motor driver board on GPIO header
-7. Camera module on ribbon cable through cutout
+7. Mount pan-tilt unit to pan_tilt_mount plate, attach camera
 8. Install 40mm PWM fan in fan mount with chimney for exhaust
 9. Mount BME280 climate sensor inside with vents for airflow
 10. Seal with silicone gasket for weatherproofing
