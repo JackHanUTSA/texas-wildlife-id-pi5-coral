@@ -2,6 +2,7 @@ import yaml
 import argparse
 import cv2
 import os
+import time
 from datetime import datetime
 from src.capture import IRCamera
 from src.inference import CoralInference
@@ -9,6 +10,8 @@ from src.utils import ensure_dirs, timestamp
 from src.power import PowerManager
 from src.cellular import CellularUploader
 from src.motor import MotorTrigger
+from src.climate import ClimateSensor
+from src.fan import FanController
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -25,21 +28,41 @@ def main():
         cfg['inference']['model_path'] = args.model
     if args.labels:
         cfg['inference']['labels_path'] = args.labels
+
     ensure_dirs(cfg)
+    
     cam = IRCamera(cfg['camera'])
     infer = CoralInference(cfg['inference']['model_path'], cfg['inference']['labels_path'], cfg['inference']['input_size'])
     power = PowerManager(cfg['power']['low_battery_threshold'], cfg['power'].get('battery_monitor_pin'))
     cellular = CellularUploader(cfg['cellular']['receiver_url'], cfg['cellular'].get('apn'), cfg['cellular'].get('modem_device')) if cfg['cellular']['enabled'] else None
     motor = MotorTrigger(cfg['motor']['gpio_pin'], cfg['motor']['trigger_duration_sec'], cfg['motor']['cooldown_sec']) if cfg['motor']['enabled'] else None
+    climate = ClimateSensor(cfg['climate']['sensor_type'], cfg['climate']['i2c_bus'], cfg['climate']['address']) if cfg['climate']['enabled'] else None
+    fan = FanController(cfg['fan']['gpio_pin'], cfg['fan']['pwm_freq_hz'], cfg['fan']['min_duty'], cfg['fan']['max_duty']) if cfg['fan']['enabled'] else None
+
     csv_path = cfg['output']['log_file']
+    climate_log = 'logs/climate.csv'
     if not os.path.exists(csv_path):
         with open(csv_path, 'w') as f:
             f.write('timestamp,class,confidence,xmin,ymin,xmax,ymax\n')
-    print('Starting Texas Wildlife ID with solar + cellular + motor...')
+    if not os.path.exists(climate_log):
+        with open(climate_log, 'w') as f:
+            f.write('timestamp,temperature,humidity,pressure,fan_duty\n')
+
+    print('Starting Texas Wildlife ID with solar + cellular + motor + climate + fan...')
+    last_climate = 0
     try:
         while True:
             if not power.check():
                 print('Low battery, skipping frame')
+            if climate and fan:
+                now = time.time()
+                if now - last_climate >= cfg['climate']['log_interval_sec']:
+                    data = climate.read()
+                    fan.control_by_temp(data.get('temperature'), cfg['fan']['temp_threshold_c'])
+                    with open(climate_log, 'a') as f:
+                        f.write(f"{datetime.now().isoformat()},{data.get('temperature')},{data.get('humidity')},{data.get('pressure')},{fan.current_duty}\n")
+                    last_climate = now
+
             frame_bgr, img = cam.capture_and_resize(cfg['inference']['input_size'])
             outputs = infer.infer(img)
             boxes = outputs[0][0]
@@ -78,6 +101,8 @@ def main():
         cv2.destroyAllWindows()
         if motor:
             motor.cleanup()
+        if fan:
+            fan.stop()
 
 if __name__ == '__main__':
     main()
