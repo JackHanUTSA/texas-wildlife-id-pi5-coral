@@ -12,6 +12,7 @@ from src.cellular import CellularUploader
 from src.motor import MotorTrigger
 from src.climate import ClimateSensor
 from src.fan import FanController
+from src.pan_tilt import PanTilt
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -38,6 +39,7 @@ def main():
     motor = MotorTrigger(cfg['motor']['gpio_pin'], cfg['motor']['trigger_duration_sec'], cfg['motor']['cooldown_sec']) if cfg['motor']['enabled'] else None
     climate = ClimateSensor(cfg['climate']['sensor_type'], cfg['climate']['i2c_bus'], cfg['climate']['address']) if cfg['climate']['enabled'] else None
     fan = FanController(cfg['fan']['gpio_pin'], cfg['fan']['pwm_freq_hz'], cfg['fan']['min_duty'], cfg['fan']['max_duty']) if cfg['fan']['enabled'] else None
+    pan_tilt = PanTilt(cfg['pan_tilt']['pan_pin'], cfg['pan_tilt']['tilt_pin']) if cfg['pan_tilt']['enabled'] else None
 
     csv_path = cfg['output']['log_file']
     climate_log = 'logs/climate.csv'
@@ -48,8 +50,9 @@ def main():
         with open(climate_log, 'w') as f:
             f.write('timestamp,temperature,humidity,pressure,fan_duty\n')
 
-    print('Starting Texas Wildlife ID with solar + cellular + motor + climate + fan...')
+    print('Starting Texas Wildlife ID with pan-tilt, solar + cellular + motor + climate + fan...')
     last_climate = 0
+    last_sweep = 0
     try:
         while True:
             if not power.check():
@@ -62,6 +65,17 @@ def main():
                     with open(climate_log, 'a') as f:
                         f.write(f"{datetime.now().isoformat()},{data.get('temperature')},{data.get('humidity')},{data.get('pressure')},{fan.current_duty}\n")
                     last_climate = now
+
+            if pan_tilt and cfg['pan_tilt']['sweep_enabled']:
+                now = time.time()
+                if now - last_sweep >= cfg['pan_tilt']['sweep_interval_sec']:
+                    pan_min = cfg['pan_tilt']['pan_range_min'] + 90
+                    pan_max = cfg['pan_tilt']['pan_range_max'] + 90
+                    tilt_min = cfg['pan_tilt']['tilt_range_min'] + 90
+                    tilt_max = cfg['pan_tilt']['tilt_range_max'] + 90
+                    pan_tilt.set_tilt((tilt_min+tilt_max)//2)
+                    pan_tilt.sweep(pan_min, pan_max, tilt_min, tilt_max)
+                    last_sweep = now
 
             frame_bgr, img = cam.capture_and_resize(cfg['inference']['input_size'])
             outputs = infer.infer(img)
@@ -103,6 +117,8 @@ def main():
             motor.cleanup()
         if fan:
             fan.stop()
+        if pan_tilt:
+            pan_tilt.stop()
 
 if __name__ == '__main__':
     main()
