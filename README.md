@@ -9,6 +9,8 @@ Real-time wild animal identification for Texas using Raspberry Pi 5 + infrared c
 - Solar panel + charge controller + LiFePO4 battery backup
 - 4G/5G SIM card modem / USB dongle
 - Servo/stepper motor for trap/trigger/LED
+- BME280 climate sensor for temperature/humidity monitoring
+- PWM airflow fan for thermal management
 - Optional: IR LED ring for night vision
 
 ## Software Stack
@@ -32,6 +34,8 @@ Configure `config.yaml` for:
 - `power`: solar/battery monitoring
 - `cellular`: SIM modem APN and receiver URL for image upload
 - `motor`: GPIO pin and trigger classes for auto-trigger
+- `climate`: BME280 sensor for temperature/humidity
+- `fan`: PWM fan control for thermal stability outdoors
 
 ## Project Structure
 ```
