@@ -62,6 +62,17 @@ fan:
   min_duty: 30
   max_duty: 100
 
+pan_tilt:
+  enabled: true
+  pan_pin: 13
+  tilt_pin: 19
+  pan_range_min: -90
+  pan_range_max: 90
+  tilt_range_min: 10
+  tilt_range_max: 80
+  sweep_interval_sec: 30
+  sweep_enabled: true
+
 texas_species:
   - white-tailed deer
   - mule deer
